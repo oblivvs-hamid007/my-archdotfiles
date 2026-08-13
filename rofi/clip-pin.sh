@@ -1,34 +1,85 @@
 #!/usr/bin/env bash
 
 PIN_FILE="$HOME/.config/rofi/pinned_clip.txt"
-TOUCH_FILE=$(touch "$PIN_FILE")
+touch "$PIN_FILE"
 
-# Show menu options: 1. Pin selected item, 2. View pinned items, 3. Unpin item
-ACTION=$(echo -e "Pin Last Copied Item\nView Pinned Items\nUnpin an Item" | rofi -dmenu -p " " -theme ~/.config/rofi/clipboard.rasi)
+ROFI_THEME="$HOME/.config/rofi/clipboard.rasi"
 
-case "$ACTION" in
-    "Pin Last Copied Item")
-        # Grab the top item from cliphist and add it to pinned file if not already present
-        ITEM=$(cliphist list | head -n 1 | sed 's/^[0-9]*[[:space:]]*//')
-        if [ -n "$ITEM" ]; then
-            grep -qxF "$ITEM" "$PIN_FILE" || echo "$ITEM" >> "$PIN_FILE"
-            notify-send "Clipboard" "Pinned: $ITEM"
+main_menu() {
+    while true; do
+        ACTION=$(echo -e "➜ Select Item to Pin\n➜ View Pinned Items\n➜ Unpin an Item" | rofi -dmenu -p " " -theme "$ROFI_THEME")
+
+        case "$ACTION" in
+            "➜ Select Item to Pin")
+                pin_menu
+                ;;
+            "➜ View Pinned Items")
+                view_menu
+                ;;
+            "➜ Unpin an Item")
+                unpin_menu
+                ;;
+            *)
+                # Exit when ESC is pressed or Rofi toggled off
+                exit 0
+                ;;
+        esac
+    done
+}
+
+pin_menu() {
+    while true; do
+        # Fetch clipboard items without IDs, adding a Back option at the top
+        CHOICE=$( { echo "|| Back"; cliphist list | sed 's/^[0-9]*[[:space:]]*//'; } | rofi -dmenu -p "Pin Item: " -theme "$ROFI_THEME" )
+
+        if [ -z "$CHOICE" ] || [ "$CHOICE" = "|| Back" ]; then
+            return
         fi
-        ;;
-    "View Pinned Items")
-        # Select from pinned items and copy to clipboard
-        SELECTED=$(cat "$PIN_FILE" | rofi -dmenu -p " " -theme ~/.config/rofi/clipboard.rasi)
-        if [ -n "$SELECTED" ]; then
-            echo -n "$SELECTED" | wl-copy
-            notify-send "Clipboard" "Copied pinned item to clipboard!"
+
+        # Add to pinned file if not already present
+        if ! grep -qxF "$CHOICE" "$PIN_FILE"; then
+            echo "$CHOICE" >> "$PIN_FILE"
+            notify-send "Clipboard" "Pinned item!"
         fi
-        ;;
-    "Unpin an Item")
-        # Remove selected item from pinned file
-        SELECTED=$(cat "$PIN_FILE" | rofi -dmenu -p " " -theme ~/.config/rofi/clipboard.rasi)
-        if [ -n "$SELECTED" ]; then
-            sed -i "\|^$(echo "$SELECTED" | sed 's/[^^]/[&]/g')\$|d" "$PIN_FILE"
-            notify-send "Clipboard" "Unpinned item!"
+    done
+}
+
+view_menu() {
+    while true; do
+        if [ ! -s "$PIN_FILE" ]; then
+            notify-send "Clipboard" "No pinned items yet!"
+            return
         fi
-        ;;
-esac
+
+        CHOICE=$( { echo "|| Back"; cat "$PIN_FILE"; } | rofi -dmenu -p "Pinned: " -theme "$ROFI_THEME" )
+
+        if [ -z "$CHOICE" ] || [ "$CHOICE" = "|| Back" ]; then
+            return
+        fi
+
+        echo -n "$CHOICE" | wl-copy
+        notify-send "Clipboard" "Copied to clipboard!"
+        exit 0
+    done
+}
+
+unpin_menu() {
+    while true; do
+        if [ ! -s "$PIN_FILE" ]; then
+            notify-send "Clipboard" "No pinned items to unpin!"
+            return
+        fi
+
+        CHOICE=$( { echo "|| Back"; cat "$PIN_FILE"; } | rofi -dmenu -p "Unpin Item: " -theme "$ROFI_THEME" )
+
+        if [ -z "$CHOICE" ] || [ "$CHOICE" = "||Back" ]; then
+            return
+        fi
+
+        # Remove selected line cleanly
+        sed -i "\|^$(echo "$CHOICE" | sed 's/[^^]/[&]/g')\$|d" "$PIN_FILE"
+        notify-send "Clipboard" "Unpinned item!"
+    done
+}
+
+main_menu
