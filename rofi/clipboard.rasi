@@ -1,0 +1,88 @@
+configuration {
+    show-icons:                 false;
+    font:                       "JetBrainsMono Nerd Font 10";
+}
+
+* {
+    bg:                         #181825;
+    bg-alt:                     #2a2b3d;
+    fg-muted:                   #7f849c; /* Soft gray for normal items */
+    fg-active:                  #ffffff; /* Crisp white for selected item */
+    background-color:           transparent;
+}
+
+window {
+    background-color:           @bg;
+    border:                     0px;
+    border-radius:              16px;
+    width:                      550px;       /* Nice, clean compact width */
+    padding:                    20px;
+    location:                   center;
+}
+
+mainbox {
+    children:                   [ "inputbar", "listview" ];
+    spacing:                    15px;
+}
+
+inputbar {
+    enabled:                    true;
+    spacing:                    10px;
+    padding:                    10px 15px;
+    border-radius:              10px;
+    background-color:           @bg-alt;
+    text-color:                 @fg-active;
+    children:                   [ "prompt", "entry" ];
+}
+
+prompt {
+    enabled:                    true;
+    background-color:           transparent;
+    text-color:                 inherit;
+}
+
+entry {
+    placeholder:                "Search Clipboard...";
+    placeholder-color:          #6c7086;
+    text-color:                 @fg-active;
+}
+
+listview {
+    lines:                      8;
+    columns:                    1;
+    fixed-height:               false;
+    dynamic:                    true;
+    spacing:                    5px;
+    margin:                     0px;
+    padding:                    0px;
+    border:                     0px;
+    background-color:           transparent;
+    text-color:                 @fg-muted;
+}
+
+element {
+    padding:                    8px 12px;
+    border-radius:              8px;
+    text-color:                 @fg-muted;
+    children:                   [ "element-text" ];
+}
+
+/* Selected / Active state styling */
+element selected.normal {
+    background-color:           @bg-alt;
+    text-color:                 @fg-active;
+}
+
+element-text {
+    text-color:                 inherit;
+    vertical-align:             0.5;
+    horizontal-align:           0.0;
+    wrap:                       true;         /* Enables line wrapping */
+    multi-line:                 true;         /* UNLOCKS multi-line height for rows! */
+}
+
+element-text {
+    text-color:                 inherit;
+    vertical-align:             0.5;
+    wrap:                       true;
+}
