@@ -6,7 +6,10 @@ WALL_DIR="$HOME/Downloads/walls"
 # List of images to cycle through
 WALLS=(
     "$WALL_DIR/wp1.png"
-    "$WALL_DIR/wp6.png"
+    "$WALL_DIR/wp2.png"
+    "$WALL_DIR/wp3.png"
+    "$WALL_DIR/wp4.png"
+    "$WALL_DIR/wp5.png"
 )
 
 # File to keep track of current index
