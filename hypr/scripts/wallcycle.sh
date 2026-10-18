@@ -3,14 +3,17 @@
 # Folder where your wallpapers are kept
 WALL_DIR="$HOME/Downloads/walls"
 
-# List of images to cycle through
-WALLS=(
-    "$WALL_DIR/wp1.png"
-    "$WALL_DIR/wp2.png"
-    "$WALL_DIR/wp3.png"
-    "$WALL_DIR/wp4.png"
-    "$WALL_DIR/wp5.png"
-)
+# Enable nullglob so empty matches don't return raw glob strings
+shopt -s nullglob
+
+# Dynamically grab all files starting with "wp" in WALL_DIR
+WALLS=( "$WALL_DIR"/wp* )
+
+# Check if any wallpaper starting with 'wp' was found
+if [ ${#WALLS[@]} -eq 0 ]; then
+    notify-send "Wallpaper Error" "No files starting with 'wp' found in $WALL_DIR"
+    exit 1
+fi
 
 # File to keep track of current index
 INDEX_FILE="/tmp/current_wall_index"

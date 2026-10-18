@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+echo "==> Ensuring pacman cache directory exists..."
+sudo mkdir -p /var/cache/pacman/pkg
+
+echo "==> Cleaning Pacman package cache..."
+sudo pacman -Scc --noconfirm
+
+echo "==> Cleaning Yay build cache..."
+yay -Sc --noconfirm
+
+echo "==> Removing orphaned packages..."
+if [ -n "$(pacman -Qtdq)" ]; then
+    sudo pacman -Rns $(pacman -Qtdq) --noconfirm
+else
+    echo "No orphaned packages found."
+fi
+
+echo "==> Clearing user cache..."
+rm -rf ~/.cache/*
+
+echo "==> Trimming systemd logs to 100M..."
+sudo journalctl --vacuum-size=100M
+
+echo "==> Cleanup complete!"
+echo "Current disk usage:"
+df -h /
